@@ -1,0 +1,89 @@
+---
+title: "Principal Component Analysis (PCA) with Protein data"
+author: "Humaun Farid Sohag"
+date: "2025-08-13"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+	echo = TRUE,
+	message = FALSE,
+	warning = FALSE
+)
+```
+
+# **#Step1. Load Required Libraries**
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+# Install packages if not already installed
+required_packages <- c("corrr", "ggcorrplot", "FactoMineR", "factoextra", "ibawds")
+lapply(required_packages, function(pkg) {
+  if (!require(pkg, character.only = TRUE)) install.packages(pkg)
+  library(pkg, character.only = TRUE)
+})
+```
+
+# **#Step2. Load and Inspect Data**
+
+```{r}
+data(protein)  # From 'ibawds' package
+protein_data <- protein
+cat("Dataset Dimensions:", dim(protein_data), "\n")
+str(protein_data)
+head(protein_data)
+```
+
+# **#Step3. Check for Missing Values**
+
+```{r}
+#3. Check for Missing Values
+missing_counts <- colSums(is.na(protein_data))
+print(missing_counts)
+```
+
+# **#Step4. Select Numerical Variables**
+
+```{r}
+numerical_data <- protein_data[, 2:10]
+head(numerical_data)
+```
+
+# **#Step5. PCA Computation**
+
+```{r}
+pca_model <- princomp(numerical_data, cor = TRUE) # cor=TRUE standardizes the data
+summary(pca_model)  # Proportion of variance explained
+pca_model$loadings[, 1:2]  # Loadings for first two PCs
+```
+
+# **#6. PCA Visualization**
+
+## Scree plot (Eigenvalues)
+
+```{r}
+fviz_eig(pca_model, addlabels = TRUE)
+```
+
+## Variable correlation plot (PCA Biplot)
+
+```{r}
+fviz_pca_var(pca_model, col.var = "black")
+```
+
+## Cos²: Quality of representation on PC1 & PC2
+
+```{r}
+fviz_cos2(pca_model, choice = "var", axes = 1:2)
+```
+
+## PCA variable plot with Cos² coloring
+
+```{r}
+fviz_pca_var(
+  pca_model,
+  col.var = "cos2",
+  gradient.cols = c("black", "orange", "green"),
+  repel = TRUE
+)
+```
